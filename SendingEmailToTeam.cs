@@ -27,7 +27,7 @@ namespace Sending_Email_to_Team
                 // from current user
                 Entity from = new Entity("activityparty");
                 from["partyid"] = new EntityReference("systemuser", Context.UserId);
-                // Retrieving users from Team
+                // Retrieving users from Team here we are referring to "IT Infrastructure Support Team"
                 var users = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='true'>
                 <entity name='systemuser'>
                         <attribute name='fullname' />
@@ -47,9 +47,6 @@ namespace Sending_Email_to_Team
                 </entity>
                     </fetch>";
                 var result = service.RetrieveMultiple(new FetchExpression(users));
-                //List<Guid> userGuid = new List<Guid>();
-                //string Subject = contact.GetAttributeValue<string>("new_name");
-                //string Description = contact.GetAttributeValue<string>("new_description");
                 foreach (var usersresult in result.Entities)
                 {
                     Guid userid = usersresult.GetAttributeValue<Guid>("systemuserid");

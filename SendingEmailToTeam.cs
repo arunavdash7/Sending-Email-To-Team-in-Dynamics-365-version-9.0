@@ -19,7 +19,7 @@ namespace Sending_Email_to_Team
             IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceprovider.GetService(typeof(IOrganizationServiceFactory));//getting service factory 
             IOrganizationService service = (IOrganizationService)serviceFactory.CreateOrganizationService(Context.UserId);//retrieving the service 
             ITracingService tracingService = (ITracingService)serviceprovider.GetService(typeof(ITracingService));// getting the tracing service
-            if (Context.InputParameters.Contains("Target") && Context.InputParameters["Target"] is Entity)
+             if (Context.InputParameters.Contains("Target") && Context.InputParameters["Target"] is Entity)
             {
                 Entity contact = (Entity)Context.InputParameters["Target"];//getting contact entity from inputparameters
                 string EmaildId = contact.GetAttributeValue<string>("emailaddress1");//retrieving the Email Id from contact entity
@@ -47,25 +47,27 @@ namespace Sending_Email_to_Team
                 </entity>
                     </fetch>";
                 var result = service.RetrieveMultiple(new FetchExpression(users));
+                List<Entity> c = new List<Entity>();
                 foreach (var usersresult in result.Entities)
                 {
                     Guid userid = usersresult.GetAttributeValue<Guid>("systemuserid");
-                    //userGuid.Add(id);
                     Entity to = new Entity("activityparty");
                     to["partyid"] = new EntityReference("systemuser", userid);
-                    // Create Email
-                    Entity Email = new Entity("email");
-                    Email["from"] = new Entity[] { from };
-                    Email["to"] = new Entity[] { to };
-                    Email["subject"] = "A new service request is created";
-                    // Send email request
-                    Guid _emailId = service.Create(Email);
-                    SendEmailRequest reqSendEmail = new SendEmailRequest();
-                    reqSendEmail.EmailId = _emailId;
-                    reqSendEmail.TrackingToken = "";
-                    reqSendEmail.IssueSend = true;
-                    SendEmailResponse res = (SendEmailResponse)service.Execute(reqSendEmail);
+                    c.Add(to);
                 }
+
+                Entity Email = new Entity("email");
+                Email["from"] = new Entity[] { from };
+                Email["to"] = c.ToArray();
+                Email["subject"] = "A new service request is created";
+                // Send email request
+                Guid _emailId = service.Create(Email);
+                SendEmailRequest reqSendEmail = new SendEmailRequest();
+                reqSendEmail.EmailId = _emailId;
+                reqSendEmail.TrackingToken = "";
+                reqSendEmail.IssueSend = true;
+                SendEmailResponse res = (SendEmailResponse)service.Execute(reqSendEmail);
+            }
         }
     }
-
+}
